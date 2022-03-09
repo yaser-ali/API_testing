@@ -6,6 +6,7 @@ include 'APIClass.php';
 
 global $autoID, $query, $output, $echo;
 
+
 class ChildAPI extends getAPI
 {
     public function DownloadRunMethod()
@@ -124,12 +125,12 @@ echo '<input type="submit" name="Download" value="Download Orders" />';
 </form>
 
 </br>
-<button class="" onclick="window.location.href='index.php'">Back to menu</button>
+<button onclick="window.location.href='index.php'">Back to menu</button>
 </div>
 
 
 <?php
-        echo $_SESSION['echo'];
+    echo $_SESSION['echo'];
 ?>
 
 <div>

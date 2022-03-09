@@ -1,2 +1,2 @@
 <?php 
-require 'C:\Users\Yaser\vendor\autoload.php';
+require 'autoload\vendor\autoload.php';

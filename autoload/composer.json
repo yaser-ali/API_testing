@@ -1,0 +1,10 @@
+{
+    "require": {
+        "guzzlehttp/guzzle": "^7.4",
+        "phpfastcache/phpfastcache": "^9.0",
+        "clegginabox/pdf-merger": "dev-master",
+        "jurosh/pdf-merge": "^2.1",
+        "setasign/fpdi-fpdf": "2.3",
+        "mpdf/mpdf": "*"
+    }
+}
