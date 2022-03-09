@@ -4,6 +4,10 @@ session_start();
 
 include 'APIClass.php';
 
+global $autoID, $query, $output, $echo;
+
+isset($echo);
+
 class ChildAPI extends getAPI
 {
     public function DownloadRunMethod()
@@ -68,6 +72,7 @@ function DownloadLabels()
 function refresh()
 {
     session_reset();
+    session_destroy();
 }
 
 ?>
@@ -96,13 +101,9 @@ function refresh()
     <script src="js/events.js"></script>
 </head>
 
-
-
-
 <?php 
 
-         echo '<button id="myBtn">T</button>';
-
+echo '<button>T</button>';
 
 if (in_array($_SERVER['REQUEST_METHOD'],array("GET","POST", "DELETE"))) {
     echo '<div class="loader"></div>';
@@ -128,6 +129,10 @@ echo '<input type="submit" name="Download" value="Download Orders" />';
 <button class="" onclick="window.location.href='index.php'">Back to menu</button>
 </div>
 
+
+<?php
+        echo $_SESSION['echo'];
+?>
 
 <div>
 <?php 

@@ -3,10 +3,11 @@
 include "DBConfig/DBFile.php";
 
 //Declare Download run variable
-global $DwnRun, $autoID, $query, $output;
+global $DwnRun;
 
 //Turns on output buffering.
 ob_start();
+
 
 
 class getAPI
@@ -264,6 +265,7 @@ class getAPI
                 if (isset($_POST['AcceptSubmit'])) {
                     if(!empty($_POST['poNum'])) {
                         foreach ($_POST['poNum'] as $idVal) {
+                            header("Refresh: 0");
                             $this->Accept($idVal);
                         }
                     }
@@ -319,15 +321,18 @@ class getAPI
         $rs = odbc_exec($conn , $DeleteSQLQuery);
 
         if ($rs) {
-            echo "<div class='row'>
-                    <div class='col-sm-6'>
-                        <div class='card'>
-                          <div class='card-body'>
-                            <h5 class='card-title'>Deleted ID : $autoID</h5>
-                             </div>
+            $_SESSION['autoID'] = $autoID;
+
+            $echo = '<div class="row">
+                        <div class="col-sm-6">
+                            <div class="card">
+                              <div class="card-body">
+                                <h5 class="card-title">Deleted ID : '.$_SESSION['autoID'].'</h5>
+                                 </div>
+                            </div>
                         </div>
-                    </div>
-                 </div>";
+                     </div>';
+            $_SESSION['echo'] .= $echo;
         }
         odbc_free_result($rs);
         //End
@@ -337,10 +342,8 @@ class getAPI
     //Accept PO.
     function Accept($autoID)
     {
-        //Start a session.
-        // session_start();
 
-        $SQLQuery = "Select * from getDropshippingTables where PoID='$autoID' and Accepted='0'";
+        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID and Accepted=0";
 
         global $conn, $query, $output, $ch, $DwnRun;
 
@@ -368,80 +371,36 @@ class getAPI
             $output = curl_exec($ch);
 
             odbc_exec($conn,"Update getDropshippingTables SET Accepted='1' WHERE PoID='$autoID'");
-
+            header("Refresh: 0");
         }
         else {
             header("Refresh:0");
+            session_destroy();
         }
-
         $_SESSION['autoID'] = $autoID;
-        // $_SESSION['query'] = $query;
-        // $_SESSION['output'] = $output;
+        $_SESSION['query'] = $query;
+        $_SESSION['output'] = $output;
 
-
-
-         echo '<!-- The Modal -->
-                <div id="myModal" class="modal">
-
-                  <!-- Modal content -->
-                  <div class="modal-content">
-                    <span class="close">&times;</span>
-                        <p> '.$_SESSION['autoID'].' </p>
+        $echo = '<div class="row">
+                      <div class="col-sm-6">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
+                            <p class="card-text">'.$_SESSION['query'].'</p>
+                             </div>
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title">Response:</h5>
+                            <p class="card-text">'.$_SESSION['output'].'</p>
+                          </div>
+                        </div>
+                      </div>
                   </div>
-
-                </div>
-
-                <script>
-                // Get the modal
-                var modal = document.getElementById("myModal");
-
-                // Get the button that opens the modal
-                var btn = document.getElementById("myBtn");
-
-                // Get the <span> element that closes the modal
-                var span = document.getElementsByClassName("close")[0];
-
-                // When the user clicks the button, open the modal 
-                btn.onclick = function() {
-                  modal.style.display = "block";
-                }
-
-                // When the user clicks on <span> (x), close the modal
-                span.onclick = function() {
-                  modal.style.display = "none";
-                }
-
-                // When the user clicks anywhere outside of the modal, close it
-                window.onclick = function(event) {
-                  if (event.target == modal) {
-                    modal.style.display = "none";
-                    }
-                }
-                </script>';
-
-
-       
-
-
-        // echo '<div id="'.$DwnRun.'" class="row">
-        //               <div class="col-sm-6">
-        //                 <div class="card">
-        //                   <div class="card-body">
-        //                     <h5 class="card-title">ID : '.$autoID.' - Query:</h5>
-        //                     <p class="card-text">'.$query.'</p>
-        //                      </div>
-        //                 </div>
-        //               </div>
-        //               <div class="col-sm-6">
-        //                 <div class="card">
-        //                   <div class="card-body">
-        //                     <h5 class="card-title">Response:</h5>
-        //                     <p class="card-text">'.$output.'</p>
-        //                   </div>
-        //                 </div>
-        //               </div>
-        //           </div>
-        //           </br>';
+              </br>';
+        $_SESSION['echo'] .= $echo;
 
         curl_close($ch);
         odbc_free_result($rs);
@@ -568,27 +527,36 @@ class getAPI
                 }
                 header("Location: Wayfair.php");
             }
+            else {
+                header("Refresh: 0");
+                session_destroy();
+            }
 
+        $_SESSION['autoID'] = $autoID;
+        $_SESSION['query'] = $query;
+        $_SESSION['output'] = $output;
 
-            echo "<div class='row'>
-                      <div class='col-sm-6'>
-                        <div class='card'>
-                          <div class='card-body'>
-                            <h5 class='card-title'>ID : $autoID - Query:</h5>
-                            <p class='card-text'>$query</p>
-                                </div>
+        $echo = '<div class="row">
+                      <div class="col-sm-6">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
+                            <p class="card-text">'.$_SESSION['query'].'</p>
+                             </div>
                         </div>
                       </div>
-                      <div class='col-sm-6'>
-                        <div class='card'>
-                          <div class='card-body'>
-                            <h5 class='card-title'>Response:</h5>
-                            <p class='card-text'>$output</p>
+                      <div class="col-sm-6">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title">Response:</h5>
+                            <p class="card-text">'.$_SESSION['output'].'</p>
                           </div>
                         </div>
                       </div>
                   </div>
-                  </br>";
+              </br>';
+            
+            $_SESSION['echo'] .= $echo;
 
             # Close curl connection.
             curl_close($ch);
@@ -694,29 +662,38 @@ class getAPI
             // Write the contents back to the file
             file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
         }
+        else {
+            header("Refresh: 0");
+            session_destroy();
+        }
 
-        echo "<div class='row'>
-                      <div class='col-sm-6'>
-                        <div class='card'>
-                          <div class='card-body'>
-                            <h5 class='card-title'>ID : $autoID - Query:</h5>
-                            <p class='card-text'>$query</p>
-                           </div>
+        $_SESSION['autoID'] = $autoID;
+        $_SESSION['query'] = $query;
+        $_SESSION['output'] = $output;
+
+        $echo = '<div class="row">
+                      <div class="col-sm-6">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
+                            <p class="card-text">'.$_SESSION['query'].'</p>
+                             </div>
                         </div>
                       </div>
-                      <div class='col-sm-6'>
-                        <div class='card'>
-                          <div class='card-body'>
-                            <h5 class='card-title'>Response:</h5>
-                            <p class='card-text'>$output</p>
+                      <div class="col-sm-6">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title">Response:</h5>
+                            <p class="card-text">'.$_SESSION['output'].'</p>
                           </div>
                         </div>
                       </div>
                   </div>
-                  </br>";
-
-           curl_close($ch);
-           odbc_free_result($rs);
+              </br>';
+    
+        $_SESSION['echo'] .= $echo;
+        curl_close($ch);
+        odbc_free_result($rs);
     }
 
     //Checks the stock level of each part number.
@@ -786,25 +763,25 @@ class getAPI
           exit();
 
 
-            echo "<div class='row'>
-                <div class='col-sm-6'>
-                  <div class='card'>
-                    <div class='card-body'>
-                      <h5 class='card-title'>Query:</h5>
-                      <p class='card-text'>$query</p>
-                     </div>
-                  </div>
-                </div>
-                <div class='col-sm-6'>
-                  <div class='card'>
-                    <div class='card-body'>
-                      <h5 class='card-title'>Response:</h5>
-                      <p class='card-text'>$output</p>
-                    </div>
-                  </div>
-                </div>
-            </div>
-            </br>";
+            // echo "<div class='row'>
+            //     <div class='col-sm-6'>
+            //       <div class='card'>
+            //         <div class='card-body'>
+            //           <h5 class='card-title'>Query:</h5>
+            //           <p class='card-text'>$query</p>
+            //          </div>
+            //       </div>
+            //     </div>
+            //     <div class='col-sm-6'>
+            //       <div class='card'>
+            //         <div class='card-body'>
+            //           <h5 class='card-title'>Response:</h5>
+            //           <p class='card-text'>$output</p>
+            //         </div>
+            //       </div>
+            //     </div>
+            // </div>
+            // </br>";
 
          // echo 'HTTP code: ' . $code . "</br>";
          curl_close($ch);
