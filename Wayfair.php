@@ -70,7 +70,7 @@ function DownloadLabels()
 
 function refresh()
 {
-    session_reset();
+    header("refresh:0");
     session_destroy();
 }
 
@@ -130,7 +130,12 @@ echo '<input type="submit" name="Download" value="Download Orders" />';
 
 
 <?php
+if (isset($_SESSION['autoID'])) {
     echo $_SESSION['echo'];
+}
+else {
+    echo "";
+}
 ?>
 
 <div>

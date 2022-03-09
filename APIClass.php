@@ -8,6 +8,8 @@ global $DwnRun;
 //Turns on output buffering.
 ob_start();
 
+header("refresh: 60");
+
 class getAPI
 {
     function DownloadRun()
@@ -166,8 +168,8 @@ class getAPI
            $i = 0;
             while ($row = odbc_fetch_array($rs))
             {
-                $rows[] = $row;
                 $i++;
+                $rows[] = $row;
             }
 
             foreach ($rows as $row) {
@@ -250,7 +252,7 @@ class getAPI
             //issues with the buttons causing the div element to overflow.
             echo '<input type="checkbox" onclick="toggle'.$DwnRun.'(this)" /> Select All';
             
-            echo '<table style="width:67%"><tr>';
+            echo '<table style="width:65%"><tr>';
 
             echo "<th><input class='btn btn-success' type='submit' name='AcceptSubmit' value='Accept'></th>";
             echo "<th><input class='btn btn-success' type='submit' name='RegisterSubmit' value='Register'></th>";
@@ -258,7 +260,7 @@ class getAPI
             echo "<th><input class='btn btn-success' type='submit' name='DeleteRecord' value='Delete record'/></th>";
             echo "<th><input class='btn btn-success' type='submit' name='Refresh' value='Refresh'/></th>";
             echo "<th><input type='submit' name='Stock' value='Stock'/></th>";
-            echo "<th><input type='submit' name='Invoice' value='Export invoice csv'/></th>";
+            echo "<th><input type='submit' name='Invoice' value='Export invoice'/></th>";
             echo "<th><input type='submit' name='DownloadLabels' value='Download Labels'/></th>";
             echo "</form>";
             echo '</tr></table>';
@@ -269,7 +271,6 @@ class getAPI
                 if (isset($_POST['AcceptSubmit'])) {
                     if(!empty($_POST['poNum'])) {
                         foreach ($_POST['poNum'] as $idVal) {
-                            header("Refresh: 0");
                             $this->Accept($idVal);
                         }
                     }
@@ -304,8 +305,8 @@ class getAPI
     }
 
     //Delete a record.
-    function DeleteRecord($autoID) {
-
+    function DeleteRecord($autoID) 
+    {
         global $conn, $SQLQuery, $DeleteSQLQuery, $rs;
 
         //Selecting a record to delete a specific label.
@@ -340,17 +341,17 @@ class getAPI
                      </br>';
 
             $_SESSION['echo'] .= $echo;
+            header("refresh: 0");
         }
         odbc_free_result($rs);
         //End
-        header("Location: Wayfair.php");
     }
 
     //Accept PO.
     function Accept($autoID)
     {
 
-        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID and Accepted=0";
+        $SQLQuery = "Select distinct * from getDropshippingTables where PoID=$autoID and Accepted=0";
 
         global $conn, $query, $output, $ch, $DwnRun;
 
@@ -377,9 +378,9 @@ class getAPI
             $output = curl_exec($ch);
 
             odbc_exec($conn,"Update getDropshippingTables SET Accepted='1' WHERE PoID='$autoID'");
-        }
             header("Refresh: 0");
             
+
             $_SESSION['autoID'] = $autoID;
             $_SESSION['query'] = $query;
             $_SESSION['output'] = $output;
@@ -388,7 +389,7 @@ class getAPI
                           <div class="col-sm-6">
                             <div class="card">
                               <div class="card-body">
-                                <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
+                                <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query: Accept</h5>
                                 <p class="card-text">'.$_SESSION['query'].'</p>
                                  </div>
                             </div>
@@ -403,10 +404,13 @@ class getAPI
                           </div>
                       </div>
                   </br>';
-                  
+                  $_SESSION['echo'] .= $echo;
+        }
+        else {
+            echo $_SESSION['echo'] = "";
+        }
         curl_close($ch);
         odbc_free_result($rs);
-        $_SESSION['echo'] .= $echo;
     }
 
     //Download labels.
@@ -526,40 +530,41 @@ class getAPI
                 else {
                     echo "";
                     odbc_exec($conn , "Update getDropshippingTables SET register='1' WHERE PoID='$autoID'");
-                    header("Refresh: 30;");
+                    header("Refresh: 0");
+
+                    $_SESSION['autoID'] = $autoID;
+                    $_SESSION['query'] = $query;
+                    $_SESSION['output'] = $output;
+
+                    $echo = '<div class="row">
+                                  <div class="col-sm-6">
+                                    <div class="card">
+                                      <div class="card-body">
+                                        <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query: Register</h5>
+                                        <p class="card-text">'.$_SESSION['query'].'</p>
+                                         </div>
+                                    </div>
+                                  </div>
+                                  <div class="col-sm-6">
+                                    <div class="card">
+                                      <div class="card-body">
+                                        <h5 class="card-title">Response:</h5>
+                                        <p class="card-text">'.$_SESSION['output'].'</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                              </div>
+                          </br>';
                 }
             }
-            header("Refresh: 0");
-
-            $_SESSION['autoID'] = $autoID;
-            $_SESSION['query'] = $query;
-            $_SESSION['output'] = $output;
-
-            $echo = '<div class="row">
-                          <div class="col-sm-6">
-                            <div class="card">
-                              <div class="card-body">
-                                <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
-                                <p class="card-text">'.$_SESSION['query'].'</p>
-                                 </div>
-                            </div>
-                          </div>
-                          <div class="col-sm-6">
-                            <div class="card">
-                              <div class="card-body">
-                                <h5 class="card-title">Response:</h5>
-                                <p class="card-text">'.$_SESSION['output'].'</p>
-                              </div>
-                            </div>
-                          </div>
-                      </div>
-                  </br>';
-            
-            $_SESSION['echo'] .= $echo;
+            else {
+                echo $_SESSION['echo'] . $_SESSION['autoID'] . "Already has been acccepted";
+            }
 
             # Close curl connection.
             curl_close($ch);
             odbc_free_result($rs);
+            $_SESSION['echo'] .= $echo;
     }
 
     //Dispatch PO.
@@ -638,10 +643,10 @@ class getAPI
                     $success = odbc_execute($dispatchSQL, array(isset($po[ 'submittedAt' ]) , $autoID));
                 }
                 odbc_exec($conn , "Update getDropshippingTables SET dispatch='1' WHERE PoID='$autoID'");
-                // header("Location: Wayfair.php");
+
                 if (file_exists("./labels/" . $poNumber . ".pdf")) {
                 //Deletes the labels of a PO number that has been dispatched.
-                    unlink("./labels/" . $poNumber . ".pdf");
+                unlink("./labels/" . $poNumber . ".pdf");
                 }
                 else {
                     echo "";
@@ -660,37 +665,39 @@ class getAPI
             $current = json_encode($output);
             // Write the contents back to the file
             file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
-        }
+            $_SESSION['autoID'] = $autoID;
+            $_SESSION['query'] = $query;
+            $_SESSION['output'] = $output;
 
-        header("Refresh: 0");
-
-        $_SESSION['autoID'] = $autoID;
-        $_SESSION['query'] = $query;
-        $_SESSION['output'] = $output;
-
-        $echo = '<div class="row">
-                      <div class="col-sm-6">
-                        <div class="card">
-                          <div class="card-body">
-                            <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
-                            <p class="card-text">'.$_SESSION['query'].'</p>
-                             </div>
-                        </div>
-                      </div>
-                      <div class="col-sm-6">
-                        <div class="card">
-                          <div class="card-body">
-                            <h5 class="card-title">Response:</h5>
-                            <p class="card-text">'.$_SESSION['output'].'</p>
+            $echo = '<div class="row">
+                          <div class="col-sm-6">
+                            <div class="card">
+                              <div class="card-body">
+                                <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query: Dispatch</h5>
+                                <p class="card-text">'.$_SESSION['query'].'</p>
+                                 </div>
+                            </div>
                           </div>
-                        </div>
+                          <div class="col-sm-6">
+                            <div class="card">
+                              <div class="card-body">
+                                <h5 class="card-title">Response:</h5>
+                                <p class="card-text">'.$_SESSION['output'].'</p>
+                              </div>
+                            </div>
+                          </div>
                       </div>
-                  </div>
-              </br>';
-    
-        $_SESSION['echo'] .= $echo;
-        curl_close($ch);
-        odbc_free_result($rs);
+                  </br>';
+                  header("Refresh: 0");
+            }
+            else {
+                echo $_SESSION['echo'] . $_SESSION['autoID'] . "Already has been dispatched";
+            }
+
+
+            curl_close($ch);
+            odbc_free_result($rs);
+            $_SESSION['echo'] .= $echo;
     }
 
     //Checks the stock level of each part number.
