@@ -1,0 +1,61 @@
+USE [API]
+GO
+
+/****** Object:  Table [dbo].[getDropshippingTables]    Script Date: 09/03/2022 17:11:58 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[getDropshippingTables](
+	[PoID] [int] IDENTITY(1,1) NOT NULL,
+	[poNumber] [varchar](50) NULL,
+	[poDate] [varchar](50) NULL,
+	[estimatedShipDate] [varchar](50) NULL,
+	[customerName] [varchar](150) NULL,
+	[customerAddress1] [varchar](150) NULL,
+	[customerAddress2] [varchar](150) NULL,
+	[customerCity] [varchar](50) NULL,
+	[customerState] [varchar](50) NULL,
+	[customerPostalCode] [varchar](50) NULL,
+	[orderType] [varchar](50) NULL,
+	[shipSpeed] [varchar](50) NULL,
+	[carrierCode] [varchar](50) NULL,
+	[packingSlipUrl] [varchar](200) NULL,
+	[trackingNum] [varchar](150) NULL,
+	[warehouseID] [bigint] NULL,
+	[warehouseName] [varchar](150) NULL,
+	[addressname] [varchar](150) NULL,
+	[address1] [varchar](150) NULL,
+	[address2] [varchar](150) NULL,
+	[address3] [varchar](150) NULL,
+	[city] [varchar](50) NULL,
+	[state] [varchar](50) NULL,
+	[country] [varchar](50) NULL,
+	[postalcode] [varchar](50) NULL,
+	[partNumber] [varchar](15) NULL,
+	[quantity] [bigint] NULL,
+	[price] [varchar](5) NULL,
+	[phoneNumber] [varchar](150) NULL,
+	[Ref] [varchar](50) NULL,
+	[CustStatus] [varchar](50) NULL,
+	[stockLevel] [varchar](50) NULL,
+	[DownloadRun] [varchar](50) NULL,
+	[Accepted] [int] NULL,
+	[register] [int] NULL,
+	[dispatch] [int] NULL,
+	[submittedAt] [varchar](500) NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[getDropshippingTables] ADD  CONSTRAINT [DF_getDropshippingTables_Accepted]  DEFAULT ((0)) FOR [Accepted]
+GO
+
+ALTER TABLE [dbo].[getDropshippingTables] ADD  CONSTRAINT [DF_getDropshippingTables_register]  DEFAULT ((0)) FOR [register]
+GO
+
+ALTER TABLE [dbo].[getDropshippingTables] ADD  CONSTRAINT [DF_getDropshippingTables_dispatch]  DEFAULT ((0)) FOR [dispatch]
+GO
+
+

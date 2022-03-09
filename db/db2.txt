@@ -1,0 +1,25 @@
+USE [API]
+GO
+
+/****** Object:  Table [dbo].[StockLevelTable]    Script Date: 09/03/2022 17:13:03 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[StockLevelTable](
+	[Account] [varchar](12) NULL,
+	[PRODKEY] [varchar](100) NULL,
+	[Offset] [smallint] NULL,
+	[PRODUCT_CODE] [varchar](90) NULL,
+	[LOCATION] [varchar](10) NULL,
+	[PHYSICAL] [bigint] NULL,
+	[DEMANDS] [bigint] NULL,
+	[FREE_STOCK] [real] NULL,
+	[ALLOCATED] [real] NULL,
+	[P_ORDERS] [real] NULL
+) ON [PRIMARY]
+GO
+
+

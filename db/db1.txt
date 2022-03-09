@@ -1,0 +1,48 @@
+USE [API]
+GO
+
+/****** Object:  Table [dbo].[QV_STPRODMASTER]    Script Date: 09/03/2022 17:12:40 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[QV_STPRODMASTER](
+	[Account] [varchar](16) NULL,
+	[CODE] [varchar](98) NULL,
+	[Offset] [smallint] NULL,
+	[DESCRIPTION] [varchar](648) NULL,
+	[PRODGROUP] [varchar](6) NULL,
+	[ITEMTYPE] [varchar](8) NULL,
+	[UNITOFSTOCK] [varchar](10) NULL,
+	[QUALITY] [varchar](22) NULL,
+	[PRODCLASS1] [varchar](max) NULL,
+	[PRODCLASS2] [varchar](max) NULL,
+	[SUPPLIER] [varchar](22) NULL,
+	[PRODTYPE] [varchar](2) NULL,
+	[SHADE] [varchar](30) NULL,
+	[PHYSICAL] [real] NULL,
+	[DEMANDS] [real] NULL,
+	[FREESTOCK] [real] NULL,
+	[ONPO] [real] NULL,
+	[BATCHNO] [varchar](14) NULL,
+	[PRODCLASS3] [varchar](max) NULL,
+	[PIECEORBATCH] [varchar](2) NULL,
+	[STATUS] [varchar](2) NULL,
+	[LATEST COST PRICE] [real] NULL,
+	[STANDARD COST] [real] NULL,
+	[SELLING COMPANY] [varchar](max) NULL,
+	[SAMP] [datetime] NULL,
+	[OLDCODE] [varchar](50) NULL,
+	[SALES DIVISION] [varchar](max) NULL,
+	[SAMPLE COST] [varchar](max) NULL,
+	[EAN CODE] [varchar](max) NULL,
+	[NET_WEIGHT] [real] NULL,
+	[UNIT WEIGHT] [real] NULL,
+	[GROSS WEIGHT] [real] NULL,
+	[UNITS_PER_PACK] [int] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+
