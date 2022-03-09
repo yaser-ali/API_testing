@@ -2,13 +2,6 @@
 
 session_start();
 
-global $autoID, $query, $output;
-
-$_SESSION['autoID'] = $autoID;
-$_SESSION['query'] = $query;
-$_SESSION['output'] = $output; 
-
-
 include 'APIClass.php';
 
 class ChildAPI extends getAPI
@@ -108,7 +101,8 @@ function refresh()
 
 <?php 
 
-echo '<button id="myBtn">T</button>';
+         echo '<button id="myBtn">T</button>';
+
 
 if (in_array($_SERVER['REQUEST_METHOD'],array("GET","POST", "DELETE"))) {
     echo '<div class="loader"></div>';
@@ -133,49 +127,6 @@ echo '<input type="submit" name="Download" value="Download Orders" />';
 </br>
 <button class="" onclick="window.location.href='index.php'">Back to menu</button>
 </div>
-
-<!-- The Modal -->
-<div id="myModal" class="modal">
-
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span class="close">&times;</span>
-        <p> <?php echo $_SESSION['autoID'];
-                echo $_SESSION['query'];
-                echo $_SESSION['output'];
-         ?>
-        </p>
-  </div>
-
-</div>
-
-<script>
-// Get the modal
-var modal = document.getElementById("myModal");
-
-// Get the button that opens the modal
-var btn = document.getElementById("myBtn");
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
-// When the user clicks the button, open the modal 
-btn.onclick = function() {
-  modal.style.display = "block";
-}
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() {
-  modal.style.display = "none";
-}
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-    }
-}
-</script>
 
 
 <div>
