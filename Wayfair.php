@@ -6,7 +6,6 @@ include 'APIClass.php';
 
 global $autoID, $query, $output, $echo;
 
-isset($echo);
 
 class ChildAPI extends getAPI
 {

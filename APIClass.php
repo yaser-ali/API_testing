@@ -297,6 +297,10 @@ class getAPI
                     }
                 }
         }
+        else {
+            session_destroy();
+            header("Refresh: 0");
+        }
     }
 
     //Delete a record.
@@ -525,36 +529,36 @@ class getAPI
                     odbc_exec($conn , "Update getDropshippingTables SET register='1' WHERE PoID='$autoID'");
                     header("Refresh: 30;");
                 }
-                header("Location: Wayfair.php");
+                header("Refresh: 0");
             }
             else {
                 header("Refresh: 0");
                 session_destroy();
             }
 
-        $_SESSION['autoID'] = $autoID;
-        $_SESSION['query'] = $query;
-        $_SESSION['output'] = $output;
+            $_SESSION['autoID'] = $autoID;
+            $_SESSION['query'] = $query;
+            $_SESSION['output'] = $output;
 
-        $echo = '<div class="row">
-                      <div class="col-sm-6">
-                        <div class="card">
-                          <div class="card-body">
-                            <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
-                            <p class="card-text">'.$_SESSION['query'].'</p>
-                             </div>
-                        </div>
-                      </div>
-                      <div class="col-sm-6">
-                        <div class="card">
-                          <div class="card-body">
-                            <h5 class="card-title">Response:</h5>
-                            <p class="card-text">'.$_SESSION['output'].'</p>
+            $echo = '<div class="row">
+                          <div class="col-sm-6">
+                            <div class="card">
+                              <div class="card-body">
+                                <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query:</h5>
+                                <p class="card-text">'.$_SESSION['query'].'</p>
+                                 </div>
+                            </div>
                           </div>
-                        </div>
+                          <div class="col-sm-6">
+                            <div class="card">
+                              <div class="card-body">
+                                <h5 class="card-title">Response:</h5>
+                                <p class="card-text">'.$_SESSION['output'].'</p>
+                              </div>
+                            </div>
+                          </div>
                       </div>
-                  </div>
-              </br>';
+                  </br>';
             
             $_SESSION['echo'] .= $echo;
 
@@ -575,7 +579,7 @@ class getAPI
 
       Volume = (Select POWER(NET_WEIGHT, 3) From [API].[dbo].[QV_STPRODMASTER] where Account = 'BEDMAKER' AND CODE = a.partNumber)
 
-      FROM API.dbo.getDropshippingTables a where PoID='$autoID'";
+      FROM API.dbo.getDropshippingTables a where PoID='$autoID' and Dispatch=0";
 
         global $conn, $query, $output, $ch;
 
@@ -666,6 +670,7 @@ class getAPI
             header("Refresh: 0");
             session_destroy();
         }
+            header("Refresh: 0");
 
         $_SESSION['autoID'] = $autoID;
         $_SESSION['query'] = $query;
