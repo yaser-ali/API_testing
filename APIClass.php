@@ -8,8 +8,6 @@ global $DwnRun;
 //Turns on output buffering.
 ob_start();
 
-
-
 class getAPI
 {
     function DownloadRun()
@@ -106,8 +104,14 @@ class getAPI
                     addressname, address1, address2, address3, city, state, country, postalcode, partNumber, quantity, price, phoneNumber, DownloadRun)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ");
+                
+                if ($item['shipTo']['country'] == "GB") {
+                    $country = "GB";
+                }
+                else {
+                    $country = "WW";
+                }
 
-                $country = $item['shipTo']['country'];
                 //Download run string identifier
                 $downloadRunString = $country . $date . $unixStr;
 
@@ -128,7 +132,7 @@ class getAPI
         // Write the contents back to the file
         file_put_contents($file , "The response: ". $current);
 
-        if ($success) 
+        if ($success)
         {
             echo '<div id="DataDisplay" class="col-sm-10">
                     <div class="card">
@@ -297,10 +301,6 @@ class getAPI
                     }
                 }
         }
-        else {
-            session_destroy();
-            header("Refresh: 0");
-        }
     }
 
     //Delete a record.
@@ -325,6 +325,7 @@ class getAPI
         $rs = odbc_exec($conn , $DeleteSQLQuery);
 
         if ($rs) {
+            
             $_SESSION['autoID'] = $autoID;
 
             $echo = '<div class="row">
@@ -335,7 +336,9 @@ class getAPI
                                  </div>
                             </div>
                         </div>
-                     </div>';
+                     </div>
+                     </br>';
+
             $_SESSION['echo'] .= $echo;
         }
         odbc_free_result($rs);
@@ -377,13 +380,10 @@ class getAPI
             odbc_exec($conn,"Update getDropshippingTables SET Accepted='1' WHERE PoID='$autoID'");
             header("Refresh: 0");
         }
-        else {
-            header("Refresh:0");
-            session_destroy();
-        }
         $_SESSION['autoID'] = $autoID;
         $_SESSION['query'] = $query;
         $_SESSION['output'] = $output;
+
 
         $echo = '<div class="row">
                       <div class="col-sm-6">
@@ -404,7 +404,9 @@ class getAPI
                       </div>
                   </div>
               </br>';
+
         $_SESSION['echo'] .= $echo;
+       
 
         curl_close($ch);
         odbc_free_result($rs);
@@ -530,10 +532,6 @@ class getAPI
                     header("Refresh: 30;");
                 }
                 header("Refresh: 0");
-            }
-            else {
-                header("Refresh: 0");
-                session_destroy();
             }
 
             $_SESSION['autoID'] = $autoID;
@@ -666,11 +664,7 @@ class getAPI
             // Write the contents back to the file
             file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
         }
-        else {
-            header("Refresh: 0");
-            session_destroy();
-        }
-            header("Refresh: 0");
+        header("Refresh: 0");
 
         $_SESSION['autoID'] = $autoID;
         $_SESSION['query'] = $query;
