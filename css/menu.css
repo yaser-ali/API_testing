@@ -1,0 +1,13 @@
+.menu
+{
+display:flex;
+justify-content: center;
+align-items: center;
+text-align: center;
+min-height: 80vh;
+font-size: 50px;
+}
+
+#btn {
+  font-size: 35px;
+}
