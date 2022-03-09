@@ -351,7 +351,7 @@ class getAPI
     function Accept($autoID)
     {
 
-        $SQLQuery = "Select distinct * from getDropshippingTables where PoID=$autoID and Accepted=0";
+        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID and Accepted=0";
 
         global $conn, $query, $output, $ch, $DwnRun;
 
@@ -409,7 +409,7 @@ class getAPI
         else {
             echo $_SESSION['echo'] = "";
         }
-        curl_close($ch);
+        // curl_close($ch);
         odbc_free_result($rs);
     }
 
