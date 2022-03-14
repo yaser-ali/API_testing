@@ -244,7 +244,7 @@ class getAPI
                 
                 //Output the rows specified fields.
                 echo "<tr style='text-align: center'>" . '<td> <input type="checkbox" id="po'.$DwnRun.'" name="poNum[]" value="'.$id.'">'.$x.'</td>'. "<td>" . $result . "</td>" . "<td>" . $row[ 'PoID' ] . "</td>" . "<td>" .  $row[ 'poNumber' ] . "</td>" . "<td>" . $row[ 'customerName' ] . "</td>" . "<td>" . $row[ 'poDate' ] . "</td>" . "<td>" . $row[ 'customerPostalCode' ]. "</td>" . "<td>" . $row[ 'partNumber' ] . "</td>" . "<td>" . $row[ 'quantity' ] . "</td>" . "<td>" . $row[ 'DownloadRun' ] . "</td>" . "<td>" . $row[ 'Accepted' ] . "</td>" . "<td>" . $row[ 'register' ] . "</td>" . "<td>" . $row[ 'dispatch' ] . "</td>" . "</tr>";
-                $x++;
+                    $x++;
             }
             echo "</table>";
 
@@ -272,6 +272,7 @@ class getAPI
                     if(!empty($_POST['poNum'])) {
                         foreach ($_POST['poNum'] as $idVal) {
                             $this->Accept($idVal);
+                            session_destroy();
                         }
                     }
                 }
@@ -281,6 +282,7 @@ class getAPI
                     if(!empty($_POST['poNum'])) {
                         foreach ($_POST['poNum'] as $idVal) {
                             $this->Register($idVal);
+                            session_destroy();
                         }
                     }
                 }
@@ -290,14 +292,17 @@ class getAPI
                     if(!empty($_POST['poNum'])) {
                         foreach ($_POST['poNum'] as $idVal) {
                             $this->Dispatch($idVal);
+                            session_destroy();
                         }
                     }
                 }
+                
                 //Delete record validation.
                 if (isset($_POST['DeleteRecord'])) {
                     if(!empty($_POST['poNum'])) {
                         foreach ($_POST['poNum'] as $idVal) {
                             $this->DeleteRecord($idVal);
+                            session_destroy();
                         }
                     }
                 }
@@ -329,20 +334,19 @@ class getAPI
 
             $_SESSION['autoID'] = $autoID;
 
-            $echo = '<div class="row">
-                        <div class="col-sm-6">
+            $echo = '<div class="col-sm-6">
                             <div class="card">
                               <div class="card-body">
                                 <h5 class="card-title">Deleted ID : '.$_SESSION['autoID'].'</h5>
                                  </div>
                             </div>
                         </div>
-                     </div>
                      </br>';
 
             $_SESSION['echo'] .= $echo;
             header("refresh: 0");
         }
+        session_destroy();
         odbc_free_result($rs);
         //End
     }
@@ -350,7 +354,6 @@ class getAPI
     //Accept PO.
     function Accept($autoID)
     {
-
         $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID and Accepted=0";
 
         global $conn, $query, $output, $ch, $DwnRun;
@@ -365,7 +368,6 @@ class getAPI
                     $quan = $row[ "quantity" ];
                     $price = $row[ "price" ];
                     $estimatedDate = $row[ "estimatedShipDate" ];
-                }
 
             $acceptQuery = 'mutation acceptOrder {purchaseOrders {accept(poNumber: "'.$poNumber.'",shipSpeed: '.$shipSpeed.', lineItems: [{partNumber: "'.$partNumber.'", quantity: '.$quan.', unitPrice: '.$price.', estimatedShipDate: "'.$estimatedDate.'"}]){id,handle,status,submittedAt,completedAt}}}';
 
@@ -376,6 +378,8 @@ class getAPI
             include "php_curlConfig.php";
 
             $output = curl_exec($ch);
+                    
+            curl_close($ch);
 
             odbc_exec($conn,"Update getDropshippingTables SET Accepted='1' WHERE PoID='$autoID'");
             header("Refresh: 0");
@@ -405,11 +409,11 @@ class getAPI
                       </div>
                   </br>';
                   $_SESSION['echo'] .= $echo;
+                }
         }
         else {
             echo $_SESSION['echo'] = "";
         }
-        // curl_close($ch);
         odbc_free_result($rs);
     }
 
@@ -451,78 +455,81 @@ class getAPI
 
         if ($rs) {
             while ($row = odbc_fetch_array($rs)) {
-                    $poNumber = $row[ 'poNumber' ];
-                    $wareID = $row[ 'warehouseID' ];
-            }
-
-            $Date = new \DateTime("tomorrow", new \DateTimeZone("UTC"));
-
-            $poDate = $Date->format(\DateTime::ISO8601);
-
-
-            $RegisterOrder = "mutation register {purchaseOrders {register (registrationInput: {poNumber: \"$poNumber\",warehouseId: $wareID,requestForPickupDate: \"$poDate\"}){id,eventDate,pickupDate,consolidatedShippingLabel {url},shippingLabelInfo {trackingNumber},purchaseOrder {poNumber,shippingInfo {carrierCode}}}}}";
-
-            $data = array('query' => $RegisterOrder);
-            $query = json_encode($data);
-
-            include "php_curlConfig.php";
-
-            $output = curl_exec($ch);
-
-
-            $POArray = json_decode($output);
-            $POOrders = json_encode($POArray->data->purchaseOrders);
-            $POArray = json_decode($POOrders, true);
-
-            if (is_array($POArray)) {
-            foreach ($POArray as $item) {
-                //$ShippingURL = "https://sandbox.api.wayfair.com/v1/shipping_label/" . $poNumber;
-				$ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-				
-                $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, $ShippingURL);
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-                curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-                curl_setopt($curl, CURLOPT_TIMEOUT, 0);
-                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
                 
-                // header('Content-type: application/pdf');
-                $result = curl_exec($curl);
-                curl_close($curl);
-                //Outputs the response of fetching the pdf urls.
-                // echo $result . "</br>";
+                $poNumber = $row[ 'poNumber' ];
+                $wareID = $row[ 'warehouseID' ];
 
-                // Initialize the cURL session
-                $session = curl_init($ShippingURL);
-                
-                $dir = "./labels/";
+                $Date = new \DateTime("tomorrow", new \DateTimeZone("UTC"));
 
-                $file_names = basename($ShippingURL);
-				
-                //$save = $dir . $file_names . ".pdf";
-                $save = $dir . $poNumber . ".pdf";
-    
-                // Open file
-                $file = fopen($save, 'wb'); 
-                    
-                // defines the options for the transfer
-                curl_setopt($session, CURLOPT_FILE, $file); 
-                curl_setopt($session, CURLOPT_HEADER, 0); 
-                    
-                curl_exec($session); 
-                
-                curl_close($session); 
-                    
-                fclose($file);
+                $poDate = $Date->format(\DateTime::ISO8601);
 
-                $registerSQLQuery = odbc_prepare($conn,"Update getDropshippingTables SET trackingNum=? WHERE PoID='$autoID'");
-                $success = odbc_execute($registerSQLQuery, array($item['shippingLabelInfo'][0]['trackingNumber']));
+
+                $RegisterOrder = "mutation register {purchaseOrders {register (registrationInput: {poNumber: \"$poNumber\",warehouseId: $wareID,requestForPickupDate: \"$poDate\"}){id,eventDate,pickupDate,consolidatedShippingLabel {url},shippingLabelInfo {trackingNumber},purchaseOrder {poNumber,shippingInfo {carrierCode}}}}}";
+
+                $data = array('query' => $RegisterOrder);
+                $query = json_encode($data);
+
+                include "php_curlConfig.php";
+
+                $output = curl_exec($ch);
+
+                # Close curl connection.
+                curl_close($ch);
+
+
+                $POArray = json_decode($output);
+                $POOrders = json_encode($POArray->data->purchaseOrders);
+                $POArray = json_decode($POOrders, true);
+
+                if (is_array($POArray)) {
+                foreach ($POArray as $item) {
+                    //$ShippingURL = "https://sandbox.api.wayfair.com/v1/shipping_label/" . $poNumber;
+                    $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                    
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $ShippingURL);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+                    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+                    curl_setopt($curl, CURLOPT_TIMEOUT, 0);
+                    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
+                    
+                    // header('Content-type: application/pdf');
+                    $result = curl_exec($curl);
+                    curl_close($curl);
+                    //Outputs the response of fetching the pdf urls.
+                    // echo $result . "</br>";
+
+                    // Initialize the cURL session
+                    $session = curl_init($ShippingURL);
+                    
+                    $dir = "./labels/";
+
+                    $file_names = basename($ShippingURL);
+                    
+                    //$save = $dir . $file_names . ".pdf";
+                    $save = $dir . $poNumber . ".pdf";
+        
+                    // Open file
+                    $file = fopen($save, 'wb'); 
+                        
+                    // defines the options for the transfer
+                    curl_setopt($session, CURLOPT_FILE, $file); 
+                    curl_setopt($session, CURLOPT_HEADER, 0); 
+                        
+                    curl_exec($session); 
+                    
+                    curl_close($session); 
+                        
+                    fclose($file);
+
+                    $registerSQLQuery = odbc_prepare($conn,"Update getDropshippingTables SET trackingNum=? WHERE PoID='$autoID'");
+                    $success = odbc_execute($registerSQLQuery, array($item['shippingLabelInfo'][0]['trackingNumber']));
+                    }
                 }
-            }
-            else 
-            {
-                echo "";
-            }
+                else 
+                {
+                    echo "";
+                }
 
             if (!$success) {
                     echo "Purchase Order Number ID: " . $autoID . " - " . "Has not been registered and updated in the databaase.";
@@ -557,12 +564,11 @@ class getAPI
                           </br>';
                 }
             }
+        }
             else {
                 echo $_SESSION['echo'] . $_SESSION['autoID'] . "Already has been acccepted";
             }
 
-            # Close curl connection.
-            curl_close($ch);
             odbc_free_result($rs);
             $_SESSION['echo'] .= $echo;
     }
@@ -586,6 +592,7 @@ class getAPI
         $rs = odbc_exec($conn , $SQLQuery);
 
         if ($rs) {
+
                 while ($row = odbc_fetch_array($rs))
                 {
                   $poNumber = $row[ "poNumber" ];
@@ -615,38 +622,71 @@ class getAPI
                   // $shipDate = $row['estimatedShipDate'];
                   $Date = new DateTime("now", new \DateTimeZone("UTC"));
                   $shipDate = $Date->format(\DateTime::ISO8601);
-                }
-                
-            //Dispatch function needs to show an appropriate ship date for the dispatch query below.
 
-              $DispatchQuery = '{"query":"mutation shipment($notice: ShipNoticeInput!) {purchaseOrders {shipment(notice: $notice) {handle,submittedAt, errors {key, message}}}}",';
+                  //Dispatch function needs to show an appropriate ship date for the dispatch query below.
 
-              $DispatchVariables = "\"variables\":{\"notice\": {\"poNumber\": \"$poNumber\",\"supplierId\": $wareID,\"packageCount\": $quantity,\"weight\": $NetWeight,\"volume\": $volume, \"carrierCode\": \"$carrierCode\",\"shipSpeed\": \"$shipSpeed\",\"trackingNumber\": \"$trackingNum\",\"shipDate\": \"$shipDate\",\"sourceAddress\": {\"name\": \"$wareName\",\"streetAddress1\": \"$wareAddress\", \"city\": \"$wareCity\",\"postalCode\":\"$warePostCode\",\"country\": \"$country\"},\"destinationAddress\": {\"name\": \"$custName\",\"streetAddress1\": \"$custAddress\",\"city\": \"$custCity\", \"state\": \"$custState\",\"postalCode\": \"$custPost\",\"country\": \"$country\"},\"smallParcelShipments\": [{\"package\": {\"code\": {\"type\": \"TRACKING_NUMBER\",\"value\": \"$trackingNum\"},\"weight\": $NetWeight},\"items\": [{\"partNumber\": \"$partNumber\",\"quantity\": $quantity}]}]}}}";
+                $DispatchQuery = '{"query":"mutation shipment($notice: ShipNoticeInput!) {purchaseOrders {shipment(notice: $notice) {handle,submittedAt, errors {key, message}}}}",';
+
+                $DispatchVariables = "\"variables\":{\"notice\": {\"poNumber\": \"$poNumber\",\"supplierId\": $wareID,\"packageCount\": $quantity,\"weight\": $NetWeight,\"volume\": $volume, \"carrierCode\": \"$carrierCode\",\"shipSpeed\": \"$shipSpeed\",\"trackingNumber\": \"$trackingNum\",\"shipDate\": \"$shipDate\",\"sourceAddress\": {\"name\": \"$wareName\",\"streetAddress1\": \"$wareAddress\", \"city\": \"$wareCity\",\"postalCode\":\"$warePostCode\",\"country\": \"$country\"},\"destinationAddress\": {\"name\": \"$custName\",\"streetAddress1\": \"$custAddress\",\"city\": \"$custCity\", \"state\": \"$custState\",\"postalCode\": \"$custPost\",\"country\": \"$country\"},\"smallParcelShipments\": [{\"package\": {\"code\": {\"type\": \"TRACKING_NUMBER\",\"value\": \"$trackingNum\"},\"weight\": $NetWeight},\"items\": [{\"partNumber\": \"$partNumber\",\"quantity\": $quantity}]}]}}}";
 
 
                   $data = $DispatchQuery . $DispatchVariables;
                   $query1 = json_encode($data);
                   $query = json_decode($query1);
 
-            include "php_curlConfig.php";
+                  include "php_curlConfig.php";
 
-            $output = curl_exec($ch);
+                  $output = curl_exec($ch);
+                  curl_close($ch);
 
+                  $_SESSION['autoID'] = $autoID;
+                  $_SESSION['query'] = $query;
+                  $_SESSION['output'] = $output;
 
-            $POArray = json_decode($output);
-            $POOrders = json_encode($POArray->data->purchaseOrders);
-            $POArray = json_decode($POOrders, true);
+                  $echo = '<div class="row">
+                                <div class="col-sm-6">
+                                  <div class="card">
+                                    <div class="card-body">
+                                      <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query: Dispatch</h5>
+                                      <p class="card-text">'.$_SESSION['query'].'</p>
+                                       </div>
+                                  </div>
+                                </div>
+                                <div class="col-sm-6">
+                                  <div class="card">
+                                    <div class="card-body">
+                                      <h5 class="card-title">Response:</h5>
+                                      <p class="card-text">'.$_SESSION['output'].'</p>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </br>';
+                    header("Refresh: 0");
+                }
+
+                // Inputs the json data into a text file
+                $file = 'dispatchLog/dispatchInfo.lock';
+                $current = file_put_contents($file, "w");
+                // Adds data to the file
+                $current = json_encode($output);
+                // Write the contents back to the file
+                file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
+                
+                $POArray = json_decode($output);
+                $POOrders = json_encode($POArray->data->purchaseOrders);
+                $POArray = json_decode($POOrders, true);
 
             if (is_array($POArray)) {
                 foreach ($POArray as $po) {
                     $dispatchSQL = odbc_prepare($conn, "Update getDropshippingTables SET submittedAt=? where PoID=?");
                     $success = odbc_execute($dispatchSQL, array(isset($po[ 'submittedAt' ]) , $autoID));
+                    odbc_exec($conn , "Update getDropshippingTables SET dispatch='1' WHERE PoID='$autoID'");
                 }
-                odbc_exec($conn , "Update getDropshippingTables SET dispatch='1' WHERE PoID='$autoID'");
 
                 if (file_exists("./labels/" . $poNumber . ".pdf")) {
-                //Deletes the labels of a PO number that has been dispatched.
-                unlink("./labels/" . $poNumber . ".pdf");
+                    //Deletes the labels of a PO number that has been dispatched.
+                    unlink("./labels/" . $poNumber . ".pdf");
                 }
                 else {
                     echo "";
@@ -657,59 +697,21 @@ class getAPI
             else {
                 echo "no data has been sent";
             }
-
-            // Inputs the json data into a text file
-            $file = 'dispatchLog/dispatchInfo.lock';
-            $current = file_put_contents($file, "w");
-            // Adds data to the file
-            $current = json_encode($output);
-            // Write the contents back to the file
-            file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
-            $_SESSION['autoID'] = $autoID;
-            $_SESSION['query'] = $query;
-            $_SESSION['output'] = $output;
-
-            $echo = '<div class="row">
-                          <div class="col-sm-6">
-                            <div class="card">
-                              <div class="card-body">
-                                <h5 class="card-title">ID : '.$_SESSION['autoID'].' - Query: Dispatch</h5>
-                                <p class="card-text">'.$_SESSION['query'].'</p>
-                                 </div>
-                            </div>
-                          </div>
-                          <div class="col-sm-6">
-                            <div class="card">
-                              <div class="card-body">
-                                <h5 class="card-title">Response:</h5>
-                                <p class="card-text">'.$_SESSION['output'].'</p>
-                              </div>
-                            </div>
-                          </div>
-                      </div>
-                  </br>';
-                  header("Refresh: 0");
-            }
-            else {
-                echo $_SESSION['echo'] . $_SESSION['autoID'] . "Already has been dispatched";
-            }
-
-
-            curl_close($ch);
-            odbc_free_result($rs);
-            $_SESSION['echo'] .= $echo;
+        }
+        odbc_free_result($rs);
+        $_SESSION['echo'] .= $echo;
     }
 
     //Checks the stock level of each part number.
     function stockLevel()
     {
+        global $conn, $ch, $output, $query, $queryLength;
+
         //SQL QUERY
         $SQLQuery = "SELECT PRODUCT_CODE, physical,
                     demands = (SELECT count(QUANTITY) FROM [API].[dbo].[getDropshippingTables] WHERE partNumber = a.[PRODUCT_CODE]),
                     quantityOnHand = (a.physical - (SELECT count(QUANTITY) FROM [API].[dbo].[getDropshippingTables] WHERE partNumber = a.[PRODUCT_CODE]))
                     FROM [API].[dbo].[StockLevelTable] a where Account = 'bedmaker' and LOCATION = 'wa'";
-
-        global $conn, $ch, $output, $query, $queryLength;
 
         $rs = odbc_exec($conn , $SQLQuery);
 
@@ -764,27 +766,6 @@ class getAPI
           header('Content-Disposition: attachment; filename="stockLog/StockInfo.lock"');
           header("Content-Length: " . filesize("stockLog/StockInfo.lock"));
           exit();
-
-
-            // echo "<div class='row'>
-            //     <div class='col-sm-6'>
-            //       <div class='card'>
-            //         <div class='card-body'>
-            //           <h5 class='card-title'>Query:</h5>
-            //           <p class='card-text'>$query</p>
-            //          </div>
-            //       </div>
-            //     </div>
-            //     <div class='col-sm-6'>
-            //       <div class='card'>
-            //         <div class='card-body'>
-            //           <h5 class='card-title'>Response:</h5>
-            //           <p class='card-text'>$output</p>
-            //         </div>
-            //       </div>
-            //     </div>
-            // </div>
-            // </br>";
 
          // echo 'HTTP code: ' . $code . "</br>";
          curl_close($ch);
