@@ -8,7 +8,7 @@ global $DwnRun;
 //Turns on output buffering.
 ob_start();
 
-header("refresh: 60");
+// header("refresh: 60");
 
 session_start();
 
@@ -430,8 +430,35 @@ class getAPI
 
                 if (is_array($POArray)) {
                 foreach ($POArray as $item) {
+                    switch (true)
+                    {
+                    case 0:
+                        $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                        break;
+                    case 1:
+                        $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                        break;
+                    case 2:
+                        $ShippingURL = "www.africau.edu/images/default/sample.pdf";
+                        break;
+                    case 3:
+                        $ShippingURL = "https://www.orimi.com/pdf-test.pdf";
+                        break;
+                    case 4:
+                        $ShippingURL = "https://zsory-furdo.hu/evcms_medias/upload/files/testfile.pdf";
+                        break;
+                    case 5:
+                        $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
+                        break;
+                    case 6:
+                        $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
+                        break;
+                    case 7:
+                        $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
+                        break;
+                    }
+
                     //$ShippingURL = "https://sandbox.api.wayfair.com/v1/shipping_label/" . $poNumber;
-                    $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
                     
                     $curl = curl_init();
                     curl_setopt($curl, CURLOPT_URL, $ShippingURL);
@@ -791,7 +818,7 @@ class getAPI
             $_SESSION['echo'] .= $echo;
             header("refresh: 0");
         }
-        session_destroy();
+        // session_destroy();
         odbc_free_result($rs);
         //End
     }
