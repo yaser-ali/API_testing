@@ -10,6 +10,9 @@ ob_start();
 
 header("refresh: 60");
 
+session_start();
+
+
 class getAPI
 {
     function DownloadRun()
@@ -267,45 +270,44 @@ class getAPI
 
             echo "</br>";
 
-                //Accept validation.
-                if (isset($_POST['AcceptSubmit'])) {
-                    if(!empty($_POST['poNum'])) {
-                        foreach ($_POST['poNum'] as $idVal) {
-                            $this->Accept($idVal);
-                            session_destroy();
-                        }
+            //Accept validation.
+            if (isset($_POST['AcceptSubmit'])) {
+                if(!empty($_POST['poNum'])) {
+                    foreach ($_POST['poNum'] as $autoID) {
+                        $this->Accept($autoID);
                     }
                 }
+            }
 
-                //Register validation.
-                if (isset($_POST['RegisterSubmit'])) {
-                    if(!empty($_POST['poNum'])) {
-                        foreach ($_POST['poNum'] as $idVal) {
-                            $this->Register($idVal);
-                            session_destroy();
-                        }
+            //Register validation.
+            if (isset($_POST['RegisterSubmit'])) {
+                if(!empty($_POST['poNum'])) {
+                    foreach ($_POST['poNum'] as $autoID) {
+                        $this->Register($autoID);
                     }
                 }
+            }
 
-                //Dispatch validation.
-                if (isset($_POST['DispatchSubmit'])) {
-                    if(!empty($_POST['poNum'])) {
-                        foreach ($_POST['poNum'] as $idVal) {
-                            $this->Dispatch($idVal);
-                            session_destroy();
-                        }
+
+            //Dispatch validation.
+            if (isset($_POST['DispatchSubmit'])) {
+                if(!empty($_POST['poNum'])) {
+                    foreach ($_POST['poNum'] as $autoID) {
+                        $this->Dispatch($autoID);
                     }
                 }
+            }
+
                 
-                //Delete record validation.
-                if (isset($_POST['DeleteRecord'])) {
-                    if(!empty($_POST['poNum'])) {
-                        foreach ($_POST['poNum'] as $idVal) {
-                            $this->DeleteRecord($idVal);
-                            session_destroy();
-                        }
+            //Delete record validation.
+            if (isset($_POST['DeleteRecord'])) {
+                if(!empty($_POST['poNum'])) {
+                    foreach ($_POST['poNum'] as $autoID) {
+                        $this->DeleteRecord($autoID);
                     }
                 }
+            }
+
         }
     }
 
@@ -354,6 +356,7 @@ class getAPI
     //Accept PO.
     function Accept($autoID)
     {
+
         $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID and Accepted=0";
 
         global $conn, $query, $output, $ch, $DwnRun;
@@ -361,7 +364,7 @@ class getAPI
         $rs = odbc_exec($conn , $SQLQuery);
 
         if ($rs) {
-                while ($row = odbc_fetch_array($rs)) {
+            while ($row = odbc_fetch_array($rs)) {
                     $poNumber = $row[ "poNumber" ];
                     $shipSpeed = $row[ "shipSpeed" ];
                     $partNumber = $row[ "partNumber" ];
@@ -411,8 +414,10 @@ class getAPI
                   $_SESSION['echo'] .= $echo;
                 }
         }
-        else {
-            echo $_SESSION['echo'] = "";
+        else 
+        {
+                // echo $_SESSION['autoID'] . "Already has been acccepted";
+                session_destroy();
         }
         odbc_free_result($rs);
     }
@@ -562,15 +567,17 @@ class getAPI
                                   </div>
                               </div>
                           </br>';
+                    
+                    $_SESSION['echo'] .= $echo;
+                    }
                 }
             }
-        }
             else {
-                echo $_SESSION['echo'] . $_SESSION['autoID'] . "Already has been acccepted";
+                // echo $_SESSION['autoID'] . "Already has been registered";
+                session_destroy();
             }
 
             odbc_free_result($rs);
-            $_SESSION['echo'] .= $echo;
     }
 
     //Dispatch PO.
@@ -585,7 +592,7 @@ class getAPI
 
       Volume = (Select POWER(NET_WEIGHT, 3) From [API].[dbo].[QV_STPRODMASTER] where Account = 'BEDMAKER' AND CODE = a.partNumber)
 
-      FROM API.dbo.getDropshippingTables a where PoID='$autoID' and Dispatch=0";
+      FROM API.dbo.getDropshippingTables a where PoID='$autoID' and dispatch=0";
 
         global $conn, $query, $output, $ch;
 
@@ -662,16 +669,18 @@ class getAPI
                                 </div>
                             </div>
                         </br>';
-                    header("Refresh: 0");
-                }
+                    $_SESSION['echo'] .= $echo;
 
-                // Inputs the json data into a text file
-                $file = 'dispatchLog/dispatchInfo.lock';
-                $current = file_put_contents($file, "w");
-                // Adds data to the file
-                $current = json_encode($output);
-                // Write the contents back to the file
-                file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
+                    header("Refresh: 0");
+
+                    // Inputs the json data into a text file
+                    $file = 'dispatchLog/dispatchInfo.lock';
+                    $current = file_put_contents($file, "w");
+                    // Adds data to the file
+                    $current = json_encode($output);
+                    // Write the contents back to the file
+                    file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
+                }
                 
                 $POArray = json_decode($output);
                 $POOrders = json_encode($POArray->data->purchaseOrders);
@@ -698,8 +707,11 @@ class getAPI
                 echo "no data has been sent";
             }
         }
+        else {
+                // echo $_SESSION['autoID'] . "Already has been dispatched";
+                session_destroy();
+        }
         odbc_free_result($rs);
-        $_SESSION['echo'] .= $echo;
     }
 
     //Checks the stock level of each part number.

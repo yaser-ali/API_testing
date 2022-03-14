@@ -1,6 +1,5 @@
 <?php
 
-session_start();
 
 include 'APIClass.php';
 
@@ -128,7 +127,6 @@ echo '<input type="submit" name="Download" value="Download Orders" />';
 <button onclick="window.location.href='index.php'">Back to menu</button>
 </div>
 
-
 <?php
 if (isset($_SESSION['autoID'])) {
     echo $_SESSION['echo'];
@@ -144,5 +142,7 @@ else {
     $obj->BreakDownDownloadRunMethod();
 ?>
 </div>
+
+
 
 </body>
