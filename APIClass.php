@@ -13,6 +13,11 @@ header("refresh: 60");
 session_start();
 
 
+if ($_SERVER['REQUEST_METHOD'] !== "POST") {
+    session_destroy();
+}
+
+
 class getAPI
 {
     function DownloadRun()
@@ -219,6 +224,7 @@ class getAPI
         </script>';
 
         if ($rs) {
+
             echo '<table class="table table-dark">';
             echo '<tr style="text-align: center;">';
             echo '<th>Select</th>
@@ -307,9 +313,10 @@ class getAPI
                     }
                 }
             }
-        }
-        else {
-            session_destroy();
+            // $destroySessionFlag = filter_input(INPUT_POST, 'poNum');
+            // if ($destroySessionFlag == $id) {
+            //     session_destroy();
+            // }
         }
     }
 
