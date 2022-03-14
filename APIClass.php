@@ -393,12 +393,13 @@ class getAPI
     //Register PO.
     function Register($autoID)
     {
-        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID AND (Register=0 AND accepted=1)";
+        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID AND (register=0 AND accepted=1)";
 
         global $conn, $query, $output, $ch, $content, $success;
 
         $rs = odbc_exec($conn , $SQLQuery);
 
+        $i = 0;
 
         if ($rs) {
             while ($row = odbc_fetch_array($rs)) {
@@ -429,33 +430,41 @@ class getAPI
                 $POArray = json_decode($POOrders, true);
 
                 if (is_array($POArray)) {
+                
                 foreach ($POArray as $item) {
-                    switch (true)
+
+                    switch ($poNumber)
                     {
-                    case 0:
-                        $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                        break;
-                    case 1:
-                        $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-                        break;
-                    case 2:
-                        $ShippingURL = "www.africau.edu/images/default/sample.pdf";
-                        break;
-                    case 3:
-                        $ShippingURL = "https://www.orimi.com/pdf-test.pdf";
-                        break;
-                    case 4:
-                        $ShippingURL = "https://zsory-furdo.hu/evcms_medias/upload/files/testfile.pdf";
-                        break;
-                    case 5:
-                        $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
-                        break;
-                    case 6:
-                        $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
-                        break;
-                    case 7:
-                        $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
-                        break;
+                        case "UK387127590":
+                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                            break;
+                        case "UK387124574":
+                            $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                            break;
+                        case "UK387126300":
+                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                            break;
+                        case "UK387122994":
+                            $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                            break;
+                        case "UK387127662":
+                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                            break;
+                        case "UK387125140":
+                            $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
+                            break;
+                        case "UK387122166":
+                            $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
+                            break;
+                        case "UK387124106":
+                            $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
+                            break;
+                        case "UK387127524":
+                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                            break;
+                        case "UK387123964":
+                            $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                            break;
                     }
 
                     //$ShippingURL = "https://sandbox.api.wayfair.com/v1/shipping_label/" . $poNumber;
@@ -511,7 +520,6 @@ class getAPI
                 else {
                     echo "";
                     odbc_exec($conn , "Update getDropshippingTables SET register='1' WHERE PoID='$autoID'");
-                    header("Refresh: 0");
 
                     $_SESSION['autoID'] = $autoID;
                     $_SESSION['query'] = $query;
@@ -540,6 +548,7 @@ class getAPI
                     $_SESSION['echo'] .= $echo;
                     }
                 }
+                header("Refresh: 0");
             }
             else {
                 // echo $_SESSION['autoID'] . "Already has been registered";
@@ -818,7 +827,7 @@ class getAPI
             $_SESSION['echo'] .= $echo;
             header("refresh: 0");
         }
-        // session_destroy();
+        session_destroy();
         odbc_free_result($rs);
         //End
     }

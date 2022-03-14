@@ -5,6 +5,7 @@
         "clegginabox/pdf-merger": "dev-master",
         "jurosh/pdf-merge": "^2.1",
         "setasign/fpdi-fpdf": "2.3",
-        "mpdf/mpdf": "*"
+        "mpdf/mpdf": "*",
+        "setasign/fpdi": "^2.3"
     }
 }

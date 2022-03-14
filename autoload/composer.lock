@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d5ef67308ba39debe586b37f2252666e",
+    "content-hash": "6caf76e74df75bbe3a52ac99658df298",
     "packages": [
         {
             "name": "clegginabox/pdf-merger",
