@@ -393,17 +393,16 @@ class getAPI
     //Register PO.
     function Register($autoID)
     {
-        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID AND (register=0 AND accepted=1)";
+        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID AND accepted=1";
 
         global $conn, $query, $output, $ch, $content, $success;
 
         $rs = odbc_exec($conn , $SQLQuery);
 
-        $i = 0;
-
         if ($rs) {
+            
             while ($row = odbc_fetch_array($rs)) {
-                
+
                 $poNumber = $row[ 'poNumber' ];
                 $wareID = $row[ 'warehouseID' ];
 
@@ -431,41 +430,41 @@ class getAPI
 
                 if (is_array($POArray)) {
                 
-                foreach ($POArray as $item) {
+                    foreach ($POArray as $item) {
 
-                    switch ($poNumber)
-                    {
-                        case "UK387127590":
-                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                            break;
-                        case "UK387124574":
-                            $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-                            break;
-                        case "UK387126300":
-                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                            break;
-                        case "UK387122994":
-                            $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-                            break;
-                        case "UK387127662":
-                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                            break;
-                        case "UK387125140":
-                            $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
-                            break;
-                        case "UK387122166":
-                            $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
-                            break;
-                        case "UK387124106":
-                            $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
-                            break;
-                        case "UK387127524":
-                            $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                            break;
-                        case "UK387123964":
-                            $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-                            break;
-                    }
+                        switch ($poNumber)
+                        {
+                            case "UK387583724":
+                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                                break;
+                            case "UK387554873":
+                                $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                                break;
+                            case "UK387554345":
+                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                                break;
+                            case "UK387578420":
+                                $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                                break;
+                            case "UK387550942":
+                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                                break;
+                            case "UK387566137":
+                                $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
+                                break;
+                            case "UK387585722":
+                                $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
+                                break;
+                            case "UK387556244":
+                                $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
+                                break;
+                            case "UK387549006":
+                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                                break;
+                            case "UK387557832":
+                                $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                                break;
+                        }
 
                     //$ShippingURL = "https://sandbox.api.wayfair.com/v1/shipping_label/" . $poNumber;
                     
@@ -507,6 +506,7 @@ class getAPI
 
                     $registerSQLQuery = odbc_prepare($conn,"Update getDropshippingTables SET trackingNum=? WHERE PoID='$autoID'");
                     $success = odbc_execute($registerSQLQuery, array($item['shippingLabelInfo'][0]['trackingNumber']));
+                    header("Refresh: 0");
                     }
                 }
                 else 
@@ -524,6 +524,7 @@ class getAPI
                     $_SESSION['autoID'] = $autoID;
                     $_SESSION['query'] = $query;
                     $_SESSION['output'] = $output;
+
 
                     $echo = '<div class="row">
                                   <div class="col-sm-6">
@@ -548,7 +549,6 @@ class getAPI
                     $_SESSION['echo'] .= $echo;
                     }
                 }
-                header("Refresh: 0");
             }
             else {
                 // echo $_SESSION['autoID'] . "Already has been registered";

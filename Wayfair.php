@@ -1,7 +1,7 @@
 <?php
 
 
-include 'APIClass.php';
+include 'APIWayfairClass.php';
 
 global $autoID, $query, $output, $echo;
 
