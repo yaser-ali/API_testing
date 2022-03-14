@@ -307,50 +307,10 @@ class getAPI
                     }
                 }
             }
-
         }
-    }
-
-    //Delete a record.
-    function DeleteRecord($autoID) 
-    {
-        global $conn, $SQLQuery, $DeleteSQLQuery, $rs;
-
-        //Selecting a record to delete a specific label.
-        $SQLQuery = "Select poNumber from getDropshippingTables where PoID=$autoID";
-
-        $res = odbc_exec($conn, $SQLQuery);
-
-        while ($row = odbc_fetch_array($res)) {
-            $poNumber = $row['poNumber'];
+        else {
+            session_destroy();
         }
-        unlink("./labels/" . $poNumber . ".pdf");
-        //End
-
-        //Deleting the specified record.
-        $DeleteSQLQuery = "Delete from getDropshippingTables where PoID=$autoID";
-
-        $rs = odbc_exec($conn , $DeleteSQLQuery);
-
-        if ($rs) {
-
-            $_SESSION['autoID'] = $autoID;
-
-            $echo = '<div class="col-sm-6">
-                            <div class="card">
-                              <div class="card-body">
-                                <h5 class="card-title">Deleted ID : '.$_SESSION['autoID'].'</h5>
-                                 </div>
-                            </div>
-                        </div>
-                     </br>';
-
-            $_SESSION['echo'] .= $echo;
-            header("refresh: 0");
-        }
-        session_destroy();
-        odbc_free_result($rs);
-        //End
     }
 
     //Accept PO.
@@ -364,6 +324,7 @@ class getAPI
         $rs = odbc_exec($conn , $SQLQuery);
 
         if ($rs) {
+
             while ($row = odbc_fetch_array($rs)) {
                     $poNumber = $row[ "poNumber" ];
                     $shipSpeed = $row[ "shipSpeed" ];
@@ -422,36 +383,10 @@ class getAPI
         odbc_free_result($rs);
     }
 
-    //Download labels.
-    function DownloadAllLabels()
-    {
-        include "autoload.php";
-
-        $pdf = new \Jurosh\PDFMerge\PDFMerger;
-
-        //Scan the label's directory and then combine all the PO pdfs into one pdf into the merged folder.
-        $AllFiles = glob("./labels/*.pdf");
-
-        $date = date("dm");
-        
-        $fileget = "labels/merged/merged" . $date . ".pdf";
-
-
-        foreach ($AllFiles as $label) {
-            if (file_exists($label)) {
-                $pdf->AddPDF($label, 'All');
-            }
-            else {
-                echo "no labels were found";
-            }
-        }
-        $pdf->merge('download', $fileget);
-    }
-
     //Register PO.
     function Register($autoID)
     {
-        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID AND Register=0";
+        $SQLQuery = "Select * from getDropshippingTables where PoID=$autoID AND (Register=0 AND accepted=1)";
 
         global $conn, $query, $output, $ch, $content, $success;
 
@@ -592,7 +527,7 @@ class getAPI
 
       Volume = (Select POWER(NET_WEIGHT, 3) From [API].[dbo].[QV_STPRODMASTER] where Account = 'BEDMAKER' AND CODE = a.partNumber)
 
-      FROM API.dbo.getDropshippingTables a where PoID='$autoID' and dispatch=0";
+      FROM API.dbo.getDropshippingTables a where PoID='$autoID' and (dispatch=0 AND register=1 or Accepted=1)";
 
         global $conn, $query, $output, $ch;
 
@@ -680,31 +615,32 @@ class getAPI
                     $current = json_encode($output);
                     // Write the contents back to the file
                     file_put_contents($file , "The response: ". $current . "\r\n\r\n Query: " . $query);
-                }
-                
+
                 $POArray = json_decode($output);
                 $POOrders = json_encode($POArray->data->purchaseOrders);
                 $POArray = json_decode($POOrders, true);
 
-            if (is_array($POArray)) {
-                foreach ($POArray as $po) {
-                    $dispatchSQL = odbc_prepare($conn, "Update getDropshippingTables SET submittedAt=? where PoID=?");
-                    $success = odbc_execute($dispatchSQL, array(isset($po[ 'submittedAt' ]) , $autoID));
-                    odbc_exec($conn , "Update getDropshippingTables SET dispatch='1' WHERE PoID='$autoID'");
-                }
 
-                if (file_exists("./labels/" . $poNumber . ".pdf")) {
-                    //Deletes the labels of a PO number that has been dispatched.
-                    unlink("./labels/" . $poNumber . ".pdf");
+                if (is_array($POArray)) {
+                    foreach ($POArray as $po) {
+                        $dispatchSQL = odbc_prepare($conn, "Update getDropshippingTables SET submittedAt=? where PoID=?");
+                        $success = odbc_execute($dispatchSQL, array(isset($po[ 'submittedAt' ]) , $autoID));
+                        odbc_exec($conn , "Update getDropshippingTables SET dispatch='1' WHERE PoID='$autoID'");
+                    }
+
+                    if (file_exists("./labels/" . $poNumber . ".pdf")) {
+                        //Deletes the labels of a PO number that has been dispatched.
+                        unlink("./labels/" . $poNumber . ".pdf");
+                    }
+                    else {
+                        echo "";
+                    }
+                    //Delete the record in which the po number has been dispatched.
+                    odbc_exec($conn, "Update getDropshippingTables SET customerName=Null, customerAddress1=Null, customerAddress2=Null, customerCity=Null, customerState=Null, customerPostalCode=Null, phoneNumber=Null WHERE PoID='$autoID' and Dispatch='1'");
                 }
                 else {
-                    echo "";
+                    echo "no data has been sent";
                 }
-                //Delete the record in which the po number has been dispatched.
-                odbc_exec($conn, "Update getDropshippingTables SET customerName=Null, customerAddress1=Null, customerAddress2=Null, customerCity=Null, customerState=Null, customerPostalCode=Null, phoneNumber=Null WHERE PoID='$autoID' and Dispatch='1'");
-            }
-            else {
-                echo "no data has been sent";
             }
         }
         else {
@@ -783,6 +719,76 @@ class getAPI
          curl_close($ch);
          odbc_free_result($rs);
     }
+
+        //Download labels.
+    function DownloadAllLabels()
+    {
+        include "autoload.php";
+
+        $pdf = new \Jurosh\PDFMerge\PDFMerger;
+
+        //Scan the label's directory and then combine all the PO pdfs into one pdf into the merged folder.
+        $AllFiles = glob("./labels/*.pdf");
+
+        $date = date("dm");
+        
+        $fileget = "labels/merged/merged" . $date . ".pdf";
+
+
+        foreach ($AllFiles as $label) {
+            if (file_exists($label)) {
+                $pdf->AddPDF($label, 'All');
+            }
+            else {
+                echo "no labels were found";
+            }
+        }
+        $pdf->merge('download', $fileget);
+    }
+
+
+    //Delete a record.
+    function DeleteRecord($autoID) 
+    {
+        global $conn, $SQLQuery, $DeleteSQLQuery, $rs;
+
+        //Selecting a record to delete a specific label.
+        $SQLQuery = "Select poNumber from getDropshippingTables where PoID=$autoID";
+
+        $res = odbc_exec($conn, $SQLQuery);
+
+        while ($row = odbc_fetch_array($res)) {
+            $poNumber = $row['poNumber'];
+        }
+        unlink("./labels/" . $poNumber . ".pdf");
+        //End
+
+        //Deleting the specified record.
+        $DeleteSQLQuery = "Delete from getDropshippingTables where PoID=$autoID";
+
+        $rs = odbc_exec($conn , $DeleteSQLQuery);
+
+        if ($rs) {
+
+            $_SESSION['autoID'] = $autoID;
+
+            $echo = '<div class="col-sm-6">
+                            <div class="card">
+                              <div class="card-body">
+                                <h5 class="card-title">Deleted ID : '.$_SESSION['autoID'].'</h5>
+                                 </div>
+                            </div>
+                        </div>
+                     </br>';
+
+            $_SESSION['echo'] .= $echo;
+            header("refresh: 0");
+        }
+        session_destroy();
+        odbc_free_result($rs);
+        //End
+    }
+
 
     //Outputs an invoice file of each PO number.
     function InvoiceFile()
