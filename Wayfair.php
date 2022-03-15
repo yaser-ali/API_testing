@@ -97,6 +97,14 @@ function refresh()
     <link rel="stylesheet" href="css/format.css">
 
     <script src="js/events.js"></script>
+    <style>
+    .col-sm-6 {
+      display: block;
+    }
+    .col-sm-10 {
+      display: block;
+    }
+    </style>
 </head>
 
 <?php
@@ -107,7 +115,8 @@ if (in_array($_SERVER['REQUEST_METHOD'],array("GET","POST", "DELETE"))) {
     echo '<button style="float: right;" type="button" data-toggle="modal" data-target="#myModal">Toggle</button>';
 }
 ?>
-
+<br>
+<br>
 <h1 align='center'>Wayfair</h1>
 
 <body class="p-4 bg-light text-dark">

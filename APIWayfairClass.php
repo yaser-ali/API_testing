@@ -23,7 +23,7 @@ class getAPI
     function DownloadRun()
     {
         //Declare the variable
-        global $conn, $output, $query, $ch, $success;
+        global $conn, $output, $query, $ch, $success, $echo;
 
         //Graphql getDropshipPurchaseOrders query
         $getPOQuery = 'query getDropshipPurchaseOrders {
@@ -142,16 +142,19 @@ class getAPI
         // Write the contents back to the file
         file_put_contents($file , "The response: ". $current);
 
+        $_SESSION['output'] = $output;
+
         if ($success)
         {
-            echo '<div id="DataDisplay" class="col-sm-10">
+            $echo = '<div id="DataDisplay" class="col-sm-10">
                     <div class="card">
                       <div class="card-body">
                         <h5 class="card-title">Response:</h5>
-                        <p class="card-text">'.$output.'</p>
+                        <p class="card-text">'.$_SESSION['output'].'</p>
                       </div>
                     </div>
                   </div>';
+          $_SESSION['echo'] = $echo;
         }
         else
         {
@@ -237,9 +240,9 @@ class getAPI
                     <th>Code</th>
                     <th>Quantity</th>
                     <th>DownloadRun</th>
-                    <th>Accepted</th>
-                    <th>Register</th>
-                    <th>Dispatched</th>
+                    <th>A</th>
+                    <th>R</th>
+                    <th>D</th>
                 </tr>';
 
             echo '<form action="?='.$DwnRun.'" method="post">';
@@ -248,11 +251,19 @@ class getAPI
             {
                 $id = $row[ 'PoID' ];
                 $poNumber = $row['poNumber'];
+                $accepted = $row['Accepted'];
+                $registered = $row['register'];
+                $dispatched = $row['dispatch'];
+
                 $file_exists = file_exists("labels/" . $poNumber . ".pdf");
                 $result = $file_exists ? '<img src="img/tick.png" style="display:block; width:20px;"/>' : '<img src="img/cross.png" style="display:block; width:20px;"/>';
 
+                $AcceptResult = $accepted ? '<img src="img/tick.png" style="display:block; width:20px;"/>' : '<img src="img/cross.png" style="display:block; width:20px;"/>';
+                $RegisterResult = $registered ? '<img src="img/tick.png" style="display:block; width:20px;"/>' : '<img src="img/cross.png" style="display:block; width:20px;"/>';
+                $DispatchResult = $dispatched ? '<img src="img/tick.png" style="display:block; width:20px;"/>' : '<img src="img/cross.png" style="display:block; width:20px;"/>';
+
                 //Output the rows specified fields.
-                echo "<tr style='text-align: center'>" . '<td> <input type="checkbox" id="po'.$DwnRun.'" name="poNum[]" value="'.$id.'">'.$x.'</td>'. "<td>" . $result . "</td>" . "<td>" . $row[ 'PoID' ] . "</td>" . "<td>" .  $row[ 'poNumber' ] . "</td>" . "<td>" . $row[ 'customerName' ] . "</td>" . "<td>" . $row[ 'poDate' ] . "</td>" . "<td>" . $row[ 'customerPostalCode' ]. "</td>" . "<td>" . $row[ 'partNumber' ] . "</td>" . "<td>" . $row[ 'quantity' ] . "</td>" . "<td>" . $row[ 'DownloadRun' ] . "</td>" . "<td>" . $row[ 'Accepted' ] . "</td>" . "<td>" . $row[ 'register' ] . "</td>" . "<td>" . $row[ 'dispatch' ] . "</td>" . "</tr>";
+                echo "<tr style='text-align: center'>" . '<td> <input type="checkbox" id="po'.$DwnRun.'" name="poNum[]" value="'.$id.'">'.$x.'</td>'. "<td>" . $result . "</td>" . "<td>" . $row[ 'PoID' ] . "</td>" . "<td>" .  $row[ 'poNumber' ] . "</td>" . "<td>" . $row[ 'customerName' ] . "</td>" . "<td>" . $row[ 'poDate' ] . "</td>" . "<td>" . $row[ 'customerPostalCode' ]. "</td>" . "<td>" . $row[ 'partNumber' ] . "</td>" . "<td>" . $row[ 'quantity' ] . "</td>" . "<td>" . $row[ 'DownloadRun' ] . "</td>" . "<td>" . $AcceptResult . "</td>" . "<td>" . $RegisterResult . "</td>" . "<td>" . $DispatchResult . "</td>" . "</tr>";
                     $x++;
             }
             echo "</table>";
@@ -276,7 +287,7 @@ class getAPI
 
             echo "</br>";
 
-            //Accept validation.
+            //Accept validation process.
             if (isset($_POST['AcceptSubmit'])) {
                 if(!empty($_POST['poNum'])) {
                     foreach ($_POST['poNum'] as $autoID) {
@@ -285,7 +296,7 @@ class getAPI
                 }
             }
 
-            //Register validation.
+            //Register validation process.
             if (isset($_POST['RegisterSubmit'])) {
                 if(!empty($_POST['poNum'])) {
                     foreach ($_POST['poNum'] as $autoID) {
@@ -294,8 +305,7 @@ class getAPI
                 }
             }
 
-
-            //Dispatch validation.
+            //Dispatch validation process.
             if (isset($_POST['DispatchSubmit'])) {
                 if(!empty($_POST['poNum'])) {
                     foreach ($_POST['poNum'] as $autoID) {
@@ -305,7 +315,7 @@ class getAPI
             }
 
 
-            //Delete record validation.
+            //Delete record validation process.
             if (isset($_POST['DeleteRecord'])) {
                 if(!empty($_POST['poNum'])) {
                     foreach ($_POST['poNum'] as $autoID) {
@@ -330,6 +340,8 @@ class getAPI
 
         $rs = odbc_exec($conn , $SQLQuery);
 
+        $i = 0;
+
         if ($rs) {
 
             while ($row = odbc_fetch_array($rs)) {
@@ -339,6 +351,7 @@ class getAPI
                     $quan = $row[ "quantity" ];
                     $price = $row[ "price" ];
                     $estimatedDate = $row[ "estimatedShipDate" ];
+                    $i++;
 
             $acceptQuery = 'mutation acceptOrder {purchaseOrders {accept(poNumber: "'.$poNumber.'",shipSpeed: '.$shipSpeed.', lineItems: [{partNumber: "'.$partNumber.'", quantity: '.$quan.', unitPrice: '.$price.', estimatedShipDate: "'.$estimatedDate.'"}]){id,handle,status,submittedAt,completedAt}}}';
 
@@ -399,8 +412,6 @@ class getAPI
 
         $rs = odbc_exec($conn , $SQLQuery);
 
-        $i = 1;
-
         if ($rs) {
 
             while ($row = odbc_fetch_array($rs)) {
@@ -412,11 +423,7 @@ class getAPI
 
                 $poDate = $Date->format(\DateTime::ISO8601);
 
-
-
                 $RegisterOrder = "mutation register {purchaseOrders {register (registrationInput: {poNumber: \"$poNumber\",warehouseId: $wareID,requestForPickupDate: \"$poDate\"}){id,eventDate,pickupDate,consolidatedShippingLabel {url},shippingLabelInfo {trackingNumber},purchaseOrder {poNumber,shippingInfo {carrierCode}}}}}";
-
-                $i++;
 
                 $data = array('query' => $RegisterOrder);
                 $query = json_encode($data);
@@ -425,9 +432,43 @@ class getAPI
 
                 $output = curl_exec($ch);
 
+                switch ($poNumber)
+                {
+                    case strtoupper("UK388134420"):
+                        $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                        break;
+                    case strtoupper("UK388139607"):
+                        $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                        break;
+                    case strtoupper("UK388138878"):
+                        $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                        break;
+                    case strtoupper("UK388146641"):
+                        $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+                        break;
+                    case strtoupper("UK388140468"):
+                        $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                        break;
+                    case strtoupper("UK388136638"):
+                        $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
+                        break;
+                    case strtoupper("UK388136753"):
+                        $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
+                        break;
+                    case strtoupper("UK388140474"):
+                        $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
+                        break;
+                    case strtoupper("UK388135965"):
+                        $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                        break;
+                    case strtoupper("UK388136764"):
+                        $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
+                        break;
+                }
+
+
                 # Close curl connection.
                 curl_close($ch);
-
 
                 $POArray = json_decode($output);
                 $POOrders = json_encode($POArray->data->purchaseOrders);
@@ -436,52 +477,19 @@ class getAPI
                 if (is_array($POArray)) {
 
                     foreach ($POArray as $item) {
-
-                        switch ($poNumber)
-                        {
-                            case "UK387683145":
-                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                                break;
-                            case "UK387695503":
-                                $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-                                break;
-                            case "UK387665119":
-                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                                break;
-                            case "UK387692572":
-                                $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-                                break;
-                            case "UK387696401":
-                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                                break;
-                            case "UK387682318":
-                                $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
-                                break;
-                            case "UK387696278":
-                                $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
-                                break;
-                            case "UK387690060":
-                                $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
-                                break;
-                            case "UK387694946":
-                                $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
-                                break;
-                            case "UK387695691":
-                                $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-                                break;
-                        }
-
                     //$ShippingURL = "https://sandbox.api.wayfair.com/v1/shipping_label/" . $poNumber;
 
                     $curl = curl_init();
                     curl_setopt($curl, CURLOPT_URL, $ShippingURL);
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-                    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-                    curl_setopt($curl, CURLOPT_TIMEOUT, 0);
-                    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
+                    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+                    curl_setopt($curl, CURLOPT_TIMEOUT, false);
+                    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, false);
 
                     // header('Content-type: application/pdf');
                     $result = curl_exec($curl);
+                    header("Refresh: 0");
+
                     curl_close($curl);
                     //Outputs the response of fetching the pdf urls.
                     // echo $result . "</br>";
