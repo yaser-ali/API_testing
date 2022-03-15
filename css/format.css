@@ -1,3 +1,8 @@
+.modal-dialog {
+	max-width: 1100px;
+	margin: 1.75rem auto;
+}
+
 .tabs {
   position: relative;
   min-height: 200px;
@@ -46,14 +51,6 @@
   z-index: 1;
     display: block;
 }
-
-.col-sm-6 {
-    display: none;
-}
-.col-sm-10 {
-    display: none;
-}
-
 
 .btn-content {
     display: none;

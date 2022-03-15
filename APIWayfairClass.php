@@ -114,7 +114,7 @@ class getAPI
                     addressname, address1, address2, address3, city, state, country, postalcode, partNumber, quantity, price, phoneNumber, DownloadRun)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ");
-                
+
                 if ($item['shipTo']['country'] == "GB") {
                     $country = "GB";
                 }
@@ -153,7 +153,7 @@ class getAPI
                     </div>
                   </div>';
         }
-        else 
+        else
         {
             echo "No data has been received from API";
         }
@@ -171,7 +171,7 @@ class getAPI
         $rows = array();
 
         echo '<div class="tabs">';
-        
+
         if ($rs) {
            $i = 0;
             while ($row = odbc_fetch_array($rs))
@@ -212,9 +212,9 @@ class getAPI
 
         echo '<script type="text/javascript">
            function toggle'.$DwnRun.'(source) {
-       
+
            var checkboxes = document.querySelectorAll("input[id=po'.$DwnRun.']");
-       
+
            for (var i=0; i<checkboxes.length; i++)
            {
                    checkboxes[i].checked = source.checked;
@@ -250,7 +250,7 @@ class getAPI
                 $poNumber = $row['poNumber'];
                 $file_exists = file_exists("labels/" . $poNumber . ".pdf");
                 $result = $file_exists ? '<img src="img/tick.png" style="display:block; width:20px;"/>' : '<img src="img/cross.png" style="display:block; width:20px;"/>';
-                
+
                 //Output the rows specified fields.
                 echo "<tr style='text-align: center'>" . '<td> <input type="checkbox" id="po'.$DwnRun.'" name="poNum[]" value="'.$id.'">'.$x.'</td>'. "<td>" . $result . "</td>" . "<td>" . $row[ 'PoID' ] . "</td>" . "<td>" .  $row[ 'poNumber' ] . "</td>" . "<td>" . $row[ 'customerName' ] . "</td>" . "<td>" . $row[ 'poDate' ] . "</td>" . "<td>" . $row[ 'customerPostalCode' ]. "</td>" . "<td>" . $row[ 'partNumber' ] . "</td>" . "<td>" . $row[ 'quantity' ] . "</td>" . "<td>" . $row[ 'DownloadRun' ] . "</td>" . "<td>" . $row[ 'Accepted' ] . "</td>" . "<td>" . $row[ 'register' ] . "</td>" . "<td>" . $row[ 'dispatch' ] . "</td>" . "</tr>";
                     $x++;
@@ -260,7 +260,7 @@ class getAPI
 
             //issues with the buttons causing the div element to overflow.
             echo '<input type="checkbox" onclick="toggle'.$DwnRun.'(this)" /> Select All';
-            
+
             echo '<table style="width:65%"><tr>';
 
             echo "<th><input class='btn btn-success' type='submit' name='AcceptSubmit' value='Accept'></th>";
@@ -304,7 +304,7 @@ class getAPI
                 }
             }
 
-                
+
             //Delete record validation.
             if (isset($_POST['DeleteRecord'])) {
                 if(!empty($_POST['poNum'])) {
@@ -349,12 +349,12 @@ class getAPI
             include "php_curlConfig.php";
 
             $output = curl_exec($ch);
-                    
+
             curl_close($ch);
 
             odbc_exec($conn,"Update getDropshippingTables SET Accepted='1' WHERE PoID='$autoID'");
             header("Refresh: 0");
-            
+
 
             $_SESSION['autoID'] = $autoID;
             $_SESSION['query'] = $query;
@@ -382,7 +382,7 @@ class getAPI
                   $_SESSION['echo'] .= $echo;
                 }
         }
-        else 
+        else
         {
                 // echo $_SESSION['autoID'] . "Already has been acccepted";
                 session_destroy();
@@ -399,8 +399,10 @@ class getAPI
 
         $rs = odbc_exec($conn , $SQLQuery);
 
+        $i = 1;
+
         if ($rs) {
-            
+
             while ($row = odbc_fetch_array($rs)) {
 
                 $poNumber = $row[ 'poNumber' ];
@@ -411,7 +413,10 @@ class getAPI
                 $poDate = $Date->format(\DateTime::ISO8601);
 
 
+
                 $RegisterOrder = "mutation register {purchaseOrders {register (registrationInput: {poNumber: \"$poNumber\",warehouseId: $wareID,requestForPickupDate: \"$poDate\"}){id,eventDate,pickupDate,consolidatedShippingLabel {url},shippingLabelInfo {trackingNumber},purchaseOrder {poNumber,shippingInfo {carrierCode}}}}}";
+
+                $i++;
 
                 $data = array('query' => $RegisterOrder);
                 $query = json_encode($data);
@@ -429,52 +434,52 @@ class getAPI
                 $POArray = json_decode($POOrders, true);
 
                 if (is_array($POArray)) {
-                
+
                     foreach ($POArray as $item) {
 
                         switch ($poNumber)
                         {
-                            case "UK387583724":
+                            case "UK387683145":
                                 $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
                                 break;
-                            case "UK387554873":
+                            case "UK387695503":
                                 $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
                                 break;
-                            case "UK387554345":
+                            case "UK387665119":
                                 $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
                                 break;
-                            case "UK387578420":
+                            case "UK387692572":
                                 $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
                                 break;
-                            case "UK387550942":
+                            case "UK387696401":
                                 $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
                                 break;
-                            case "UK387566137":
+                            case "UK387682318":
                                 $ShippingURL = "https://www.americanexpress.com/content/dam/amex/us/staticassets/pdf/GCO/Test_PDF.pdf";
                                 break;
-                            case "UK387585722":
+                            case "UK387696278":
                                 $ShippingURL = "https://www.clickdimensions.com/links/TestPDFfile.pdf";
                                 break;
-                            case "UK387556244":
+                            case "UK387690060":
                                 $ShippingURL = "https://s2.q4cdn.com/498544986/files/doc_downloads/test.pdf";
                                 break;
-                            case "UK387549006":
+                            case "UK387694946":
                                 $ShippingURL = "https://www.soundczech.cz/temp/lorem-ipsum.pdf";
                                 break;
-                            case "UK387557832":
+                            case "UK387695691":
                                 $ShippingURL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
                                 break;
                         }
 
                     //$ShippingURL = "https://sandbox.api.wayfair.com/v1/shipping_label/" . $poNumber;
-                    
+
                     $curl = curl_init();
                     curl_setopt($curl, CURLOPT_URL, $ShippingURL);
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
                     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
                     curl_setopt($curl, CURLOPT_TIMEOUT, 0);
                     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
-                    
+
                     // header('Content-type: application/pdf');
                     $result = curl_exec($curl);
                     curl_close($curl);
@@ -483,25 +488,25 @@ class getAPI
 
                     // Initialize the cURL session
                     $session = curl_init($ShippingURL);
-                    
+
                     $dir = "./labels/";
 
                     $file_names = basename($ShippingURL);
-                    
+
                     //$save = $dir . $file_names . ".pdf";
                     $save = $dir . $poNumber . ".pdf";
-        
+
                     // Open file
-                    $file = fopen($save, 'wb'); 
-                        
+                    $file = fopen($save, 'wb');
+
                     // defines the options for the transfer
-                    curl_setopt($session, CURLOPT_FILE, $file); 
-                    curl_setopt($session, CURLOPT_HEADER, 0); 
-                        
-                    curl_exec($session); 
-                    
-                    curl_close($session); 
-                        
+                    curl_setopt($session, CURLOPT_FILE, $file);
+                    curl_setopt($session, CURLOPT_HEADER, 0);
+
+                    curl_exec($session);
+
+                    curl_close($session);
+
                     fclose($file);
 
                     $registerSQLQuery = odbc_prepare($conn,"Update getDropshippingTables SET trackingNum=? WHERE PoID='$autoID'");
@@ -509,12 +514,12 @@ class getAPI
                     header("Refresh: 0");
                     }
                 }
-                else 
+                else
                 {
-                    echo "";
+                    echo "Did not register" . $autoID;
                 }
 
-            if (!$success) {
+                if (!$success) {
                     echo "Purchase Order Number ID: " . $autoID . " - " . "Has not been registered and updated in the databaase.";
                 }
                 else {
@@ -545,7 +550,7 @@ class getAPI
                                   </div>
                               </div>
                           </br>';
-                    
+
                     $_SESSION['echo'] .= $echo;
                     }
                 }
@@ -554,7 +559,6 @@ class getAPI
                 // echo $_SESSION['autoID'] . "Already has been registered";
                 session_destroy();
             }
-
             odbc_free_result($rs);
     }
 
@@ -603,7 +607,7 @@ class getAPI
                   $NetWeight = $row['NetWeight'];
                   $netPackageCount = $row['NetPackage'];
                   $volume = $row['Volume'];
-                  
+
                   // $shipDate = $row['estimatedShipDate'];
                   $Date = new DateTime("now", new \DateTimeZone("UTC"));
                   $shipDate = $Date->format(\DateTime::ISO8601);
@@ -774,7 +778,7 @@ class getAPI
         $AllFiles = glob("./labels/*.pdf");
 
         $date = date("dm");
-        
+
         $fileget = "labels/merged/merged" . $date . ".pdf";
 
 
@@ -791,7 +795,7 @@ class getAPI
 
 
     //Delete a record.
-    function DeleteRecord($autoID) 
+    function DeleteRecord($autoID)
     {
         global $conn, $SQLQuery, $DeleteSQLQuery, $rs;
 
@@ -864,7 +868,7 @@ class getAPI
 
             header('Content-Type: application/csv');
             header('Content-Disposition: attachment; filename="inv/invoice.csv"');
-            header("Content-Length: " . filesize("inv/invoice.csv"));            
+            header("Content-Length: " . filesize("inv/invoice.csv"));
             exit();
         }
     }
